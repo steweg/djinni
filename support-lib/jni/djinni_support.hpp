@@ -53,6 +53,11 @@ void jniShutdown();
 JNIEnv * jniGetThreadEnv();
 
 /*
+ * Get the java virtual machine
+ */
+JavaVM * getVM();
+
+/*
  * Global and local reference guard objects.
  *
  * A GlobalRef<T> is constructed with a local reference; the constructor upgrades the local

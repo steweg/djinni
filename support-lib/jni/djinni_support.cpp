@@ -58,6 +58,11 @@ JNIEnv * jniGetThreadEnv() {
     return env;
 }
 
+JavaVM * getVM() {
+    assert(g_cachedJVM);
+    return g_cachedJVM;
+}
+
 static JNIEnv * getOptThreadEnv() {
     if (!g_cachedJVM) {
         return nullptr;
