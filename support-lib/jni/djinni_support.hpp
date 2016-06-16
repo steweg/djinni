@@ -121,9 +121,15 @@ typename LocalRef<T>::pointer release(LocalRef<T>&& x) noexcept { return x.relea
  */
 class jni_exception : public std::exception {
     GlobalRef<jthrowable> m_java_exception;
+    std::string m_error_msg;
 public:
     jni_exception(JNIEnv * env, jthrowable java_exception)
         : m_java_exception(env, java_exception) {
+        assert(java_exception);
+    }
+    jni_exception(JNIEnv * env, jthrowable java_exception, const std::string& error_msg)
+        : m_java_exception(env, java_exception),
+        m_error_msg(error_msg) {
         assert(java_exception);
     }
     jthrowable java_exception() const { return m_java_exception.get(); }
@@ -132,6 +138,13 @@ public:
      * Sets the pending JNI exception using this Java exception.
      */
     void set_as_pending(JNIEnv * env) const noexcept;
+
+    /*
+     * Returns pointer to a null-terminated string with explanatory information. The pointer is
+     * guaranteed to be valid at least until the exception object from which it is obtained is
+     * destroyed, or until a non-const member function on the exception object is called.
+     */
+    virtual const char* what() const throw() override;
 };
 
 /*
@@ -142,6 +155,18 @@ public:
  * jniThrowCppFromJavaException().
  */
 void jniExceptionCheck(JNIEnv * env);
+
+/*
+ * Converts java exception to std::string
+ */
+void _append_exception_trace_messages(
+                        JNIEnv&      a_jni_env,
+                        std::string& a_error_msg,
+                        jthrowable   a_exception,
+                        jmethodID    a_mid_throwable_getCause,
+                        jmethodID    a_mid_throwable_getStackTrace,
+                        jmethodID    a_mid_throwable_toString,
+                        jmethodID    a_mid_frame_toString);
 
 /*
  * Throws a C++ exception based on the given Java exception.
