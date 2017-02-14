@@ -52,16 +52,16 @@ class PythonMarshal(spec: Spec) extends Marshal(spec) {
         d.defType match {
           case DInterface  =>
             List(
-              ImportRef("from " + idPython.local(d.name) + " import " + className),
-              ImportRef("from " + idPython.local(d.name)  + " import " + className + "Helper"))
+              ImportRef("from ." + idPython.local(d.name) + " import " + className),
+              ImportRef("from ." + idPython.local(d.name)  + " import " + className + "Helper"))
           case DRecord =>
             List(
               ImportRef("from djinni.pycffi_marshal import CPyRecord"),
-              ImportRef("from " + idPython.local(d.name) + " import " + className),
-              ImportRef("from " + idPython.local(d.name) + "_helper" + " import " + className + "Helper"))
+              ImportRef("from ." + idPython.local(d.name) + " import " + className),
+              ImportRef("from ." + idPython.local(d.name) + "_helper" + " import " + className + "Helper"))
           case DEnum => List(
               ImportRef("from djinni.pycffi_marshal import CPyEnum"),
-              ImportRef("from " + idPython.local(d.name)  + " import " + className))
+              ImportRef("from ." + idPython.local(d.name)  + " import " + className))
         }
       }
       else List()
