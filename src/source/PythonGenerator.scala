@@ -1044,7 +1044,7 @@ class PythonGenerator(spec: Spec) extends Generator(spec) {
     })
 
     writePythonFile(ident.name + "_helper", origin, refs.python, true, w => {
-      w.wl("from " + ident.name + " import " + recordClassName )
+      w.wl("from ." + ident.name + " import " + recordClassName )
       w.wl
       w.wl("class " + recordClassName + "Helper" + ":").nested {
         w.wl("@staticmethod")
