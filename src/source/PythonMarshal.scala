@@ -93,15 +93,15 @@ class PythonMarshal(spec: Spec) extends Marshal(spec) {
           case MList => {
             refs.add("from djinni.pycffi_marshal import CPyObject")
             if (idPython.className(idlName) != idPython.className(exclude)) {
-              refs.add("from " + dh + idlName + " import " + idPython.className(idlName) + "Helper")
+              refs.add("from ." + dh + idlName + " import " + idPython.className(idlName) + "Helper")
             }
             getRef(tm.args(0))
           }
           case MSet | MMap => {
             refs.add("from djinni.pycffi_marshal import CPyObject, CPyObjectProxy")
             if (idPython.className(idlName) != idPython.className(exclude)) {
-              refs.add("from " + dh +idlName + " import " + idPython.className(idlName) + "Helper")
-              refs.add("from " + dh + idlName + " import " + idPython.className(idlName) + "Proxy")
+              refs.add("from ." + dh +idlName + " import " + idPython.className(idlName) + "Helper")
+              refs.add("from ." + dh + idlName + " import " + idPython.className(idlName) + "Proxy")
             }
             getRef(tm.args(0))
             if (tm.base == MMap) getRef(tm.args(1))
