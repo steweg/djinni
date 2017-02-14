@@ -41,6 +41,19 @@ class CffiGenerator(spec: Spec) extends Generator(spec) {
       w.wl("from djinni.support import *")
       w.wl("ffi = FFI()")
       w.wl
+      w.wl("import os")
+      w.wl("if sys.version_info < (2, 7):")
+      w.wl("    wrapperName = os.environ['PYCFFI_WRAPPER_NAME']")
+      w.wl("elif sys.version_info < (3, 0):")
+      w.wl("    from importlib import import_module")
+      w.wl("    wrapperName = os.environ['PYCFFI_WRAPPER_NAME']")
+      w.wl("else:")
+      w.wl("    from importlib import import_module")
+      w.wl("    wrapperName = os.environ['PYCFFI_WRAPPER_NAME']")
+      w.wl
+      w.wl("if not wrapperName:")
+      w.wl("    sys.exit('PYCFFI_WRAPPER_NAME environment variable not set')")
+      w.wl
       // Paths relative to test-suite/pybuild
       //TODO: raise exception if not at least 2 arguments?
       w.wl("args = sys.argv[1:]")
@@ -52,14 +65,17 @@ class CffiGenerator(spec: Spec) extends Generator(spec) {
       w.wl("f.write(setsource_headers)")
       w.wl("f.close()")
       w.wl
-      w.wl("ffi.set_source('" + cffi + "', '''#include \"clean_headers.h\"''',").nested {
-        w.w("runtime_library_dirs=['.']")
-        if(!spec.pycffiDynamicLibList.isEmpty) {
-          w.wl(",")
-          w.w("libraries=['" + spec.pycffiDynamicLibList + "']")
-        }
-        w.wl(")")
-      }
+//      w.wl("ffi.set_source('" + cffi + "', '''#include \"clean_headers.h\"''',").nested {
+//        w.w("runtime_library_dirs=['.']")
+//        if(!spec.pycffiDynamicLibList.isEmpty) {
+//          w.wl(",")
+//          w.w("libraries=['" + spec.pycffiDynamicLibList + "']")
+//        }
+//        w.wl(")")
+//      }
+      w.wl("ffi.set_source(wrapperName, '''#include \"clean_headers.h\"''',")
+      w.wl("    runtime_library_dirs=['.'],")
+      w.wl("    language='c++')")
       w.wl
       w.wl("ffi.cdef(\"typedef _Bool bool;\"\n + cdef_headers)")
       w.wl
