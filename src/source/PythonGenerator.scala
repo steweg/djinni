@@ -342,10 +342,10 @@ class PythonGenerator(spec: Spec) extends Generator(spec) {
       tm.base match {
         case MList | MSet | MMap => {
           if (justCollect) {
-            if (tm.base == MList) python.add("from " + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
+            if (tm.base == MList) python.add("from ." + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
             else {
-              python.add("from " + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
-              python.add("from " + marshal.dh + fileName + " import " + idPython.className(fileName) + "Proxy")
+              python.add("from ." + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
+              python.add("from ." + marshal.dh + fileName + " import " + idPython.className(fileName) + "Proxy")
             }
           } else {
             if (!writtenFiles.contains(idlName + ".py")) {
