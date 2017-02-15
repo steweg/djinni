@@ -108,6 +108,7 @@ class PythonMarshal(spec: Spec) extends Marshal(spec) {
           }
           case d: MDef => d.defType match {
             case DInterface =>
+              refs.add("from ." + idPython.local(d.name) + " import " + idPython.className(d.name) + "Helper")
             case DRecord =>
               refs.add("from ." + idPython.local(d.name)  + " import " + idPython.className(d.name))
               refs.add("from djinni.pycffi_marshal import CPyRecord")
