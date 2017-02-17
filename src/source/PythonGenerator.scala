@@ -527,8 +527,8 @@ class PythonGenerator(spec: Spec) extends Generator(spec) {
       case d: MDef => d.defType match {
         case DEnum =>
           checkForExceptionFromPython(w => {
-            w.wl("_ret= " + marshal.convertFrom(libCall, ret))
-            w.wl("assert _ret.value != -1")
+            w.wl("_ret = " + marshal.convertFrom(libCall, ret))
+            w.wl("assert _ret != -1")
             w.wl("return _ret")
           }, true, w)
           return
