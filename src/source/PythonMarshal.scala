@@ -110,9 +110,11 @@ class PythonMarshal(spec: Spec) extends Marshal(spec) {
             case DInterface =>
               refs.add("from ." + idPython.local(d.name) + " import " + idPython.className(d.name) + "Helper")
             case DRecord =>
-              refs.add("from ." + idPython.local(d.name)  + " import " + idPython.className(d.name))
+              refs.add("from ." + idPython.local(d.name) + " import " + idPython.className(d.name))
               refs.add("from djinni.pycffi_marshal import CPyRecord")
-            case DEnum => refs.add("from djinni.pycffi_marshal import CPyEnum")
+            case DEnum =>
+              refs.add("from ." + idPython.local(d.name) + " import " + idPython.className(d.name))
+              refs.add("from djinni.pycffi_marshal import CPyEnum")
           }
           case mp: MPrimitive => refs.add("from djinni.pycffi_marshal import CPyPrimitive")
           case MString => refs.add("from djinni.pycffi_marshal import CPyString")
