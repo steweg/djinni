@@ -20,6 +20,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <pthread.h>
 
 static_assert(sizeof(jlong) >= sizeof(void*), "must be able to fit a void* into a jlong");
 
@@ -28,6 +29,15 @@ namespace djinni {
 // Set only once from JNI_OnLoad before any other JNI calls, so no lock needed.
 static JavaVM * g_cachedJVM;
 
+static pthread_key_t current_jni_env;
+void detach_current_thread(void *env)
+{
+    if(g_cachedJVM != nullptr)
+    {
+        g_cachedJVM->DetachCurrentThread();
+    }
+}
+
 void jniInit(JavaVM * jvm) {
     g_cachedJVM = jvm;
 
@@ -35,6 +45,8 @@ void jniInit(JavaVM * jvm) {
         for (const auto & kv : JniClassInitializer::Registration::get_all()) {
             kv.second->init();
         }
+
+        pthread_key_create(&current_jni_env, detach_current_thread);
     } catch (const std::exception & e) {
         // Default exception handling only, since non-default might not be safe if init
         // is incomplete.
@@ -49,7 +61,13 @@ void jniShutdown() {
 JNIEnv * jniGetThreadEnv() {
     assert(g_cachedJVM);
     JNIEnv * env = nullptr;
-    const jint get_res = g_cachedJVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    auto get_res = g_cachedJVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    if (get_res == JNI_EDETACHED)
+    {
+         get_res = g_cachedJVM->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL);
+         pthread_setspecific(current_jni_env, env);
+    }
+
     if (get_res != 0 || !env) {
         // :(
         std::abort();
