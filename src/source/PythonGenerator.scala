@@ -342,10 +342,10 @@ class PythonGenerator(spec: Spec) extends Generator(spec) {
       tm.base match {
         case MList | MSet | MMap => {
           if (justCollect) {
-            if (tm.base == MList) python.add("from " + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
+            if (tm.base == MList) python.add("from ." + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
             else {
-              python.add("from " + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
-              python.add("from " + marshal.dh + fileName + " import " + idPython.className(fileName) + "Proxy")
+              python.add("from ." + marshal.dh + fileName + " import " + idPython.className(fileName) + "Helper")
+              python.add("from ." + marshal.dh + fileName + " import " + idPython.className(fileName) + "Proxy")
             }
           } else {
             if (!writtenFiles.contains(idlName + ".py")) {
@@ -527,8 +527,8 @@ class PythonGenerator(spec: Spec) extends Generator(spec) {
       case d: MDef => d.defType match {
         case DEnum =>
           checkForExceptionFromPython(w => {
-            w.wl("_ret= " + marshal.convertFrom(libCall, ret))
-            w.wl("assert _ret.value != -1")
+            w.wl("_ret = " + marshal.convertFrom(libCall, ret))
+            w.wl("assert _ret != -1")
             w.wl("return _ret")
           }, true, w)
           return
@@ -795,11 +795,20 @@ class PythonGenerator(spec: Spec) extends Generator(spec) {
       m.ret.foreach(t => refs.collect(t, false))
     })
     refs.python.add("from abc import ABCMeta, abstractmethod")
-    refs.python.add("from future.utils import with_metaclass")
+    if (!spec.python3Usage) {
+      refs.python.add("from future.utils import with_metaclass")
+    }
 
     writePythonFile(ident, origin, refs.python, true, w => {
       // Asbtract Class Definition
-      w.wl("class " + pythonClass + "(with_metaclass(ABCMeta)):").nested {
+      var metaclassStr : String = ""
+      if (spec.python3Usage) {
+        metaclassStr = "metaclass=ABCMeta"
+      }
+      else {
+        metaclassStr = "with_metaclass(ABCMeta)"
+      }
+      w.wl("class " + pythonClass + "(" + metaclassStr + "):").nested {
         val docConsts = if (!i.consts.exists(!_.doc.lines.isEmpty)) Seq() else Seq({
           w: IndentWriter => writeDocConstantsList(w, i.consts)
         })
@@ -1035,7 +1044,7 @@ class PythonGenerator(spec: Spec) extends Generator(spec) {
     })
 
     writePythonFile(ident.name + "_helper", origin, refs.python, true, w => {
-      w.wl("from " + ident.name + " import " + recordClassName )
+      w.wl("from ." + ident.name + " import " + recordClassName )
       w.wl
       w.wl("class " + recordClassName + "Helper" + ":").nested {
         w.wl("@staticmethod")
